@@ -1,0 +1,1009 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>速度と加速度の基本知識</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{
+      font-family:'Helvetica Neue',Arial,'Hiragino Kaku Gothic ProN','Yu Gothic',sans-serif;
+      background:#edf2f7;color:#1a202c;min-height:100vh;
+    }
+
+    /* ===== ヘッダー ===== */
+    header{
+      background:linear-gradient(135deg,#1e3a8a 0%,#2563eb 100%);
+      color:#fff;padding:14px 18px 12px;text-align:center;
+      box-shadow:0 2px 8px rgba(0,0,0,.25);
+    }
+    .hdr-school{font-size:11px;opacity:.75;margin-bottom:4px;letter-spacing:.5px;}
+    .hdr-title{font-size:19px;font-weight:700;letter-spacing:.5px;}
+    .hdr-sub{font-size:12px;opacity:.8;margin-top:4px;min-height:1em;}
+
+    /* ===== セクションタブ ===== */
+    .tabs{
+      background:#1e3a8a;
+    }
+    .tabs-inner{
+      display:flex;max-width:600px;margin:0 auto;
+      overflow-x:auto;-webkit-overflow-scrolling:touch;
+      scrollbar-width:none;
+    }
+    .tabs-inner::-webkit-scrollbar{display:none;}
+    .tab{
+      flex:1 1 0;min-width:0;padding:10px 5px;text-align:center;
+      font-size:11.5px;line-height:1.3;font-weight:600;color:rgba(255,255,255,.5);
+      cursor:pointer;border-bottom:3px solid transparent;
+      transition:all .2s;user-select:none;
+      white-space:normal;word-break:break-all;
+      display:flex;align-items:center;justify-content:center;
+    }
+    @media (max-width:360px){ .tab{font-size:9px;padding:6px 2px 5px;} }
+    .tab.active{color:#fbbf24;border-bottom-color:#fbbf24;}
+    .tab.disabled{opacity:.3;cursor:not-allowed;}
+
+    /* ===== メイン ===== */
+    .main{max-width:600px;margin:0 auto;padding:14px 13px 70px;}
+
+    /* ===== モード切替 ===== */
+    .mode-row{
+      display:flex;background:#fff;border-radius:10px;
+      overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.1);margin-bottom:14px;
+    }
+    .mode-btn{
+      flex:1;padding:11px 6px;border:none;background:#fff;
+      color:#6b7280;font-size:12.5px;font-weight:500;
+      cursor:pointer;font-family:inherit;transition:all .2s;
+    }
+    .mode-btn.active{background:#2563eb;color:#fff;}
+
+    /* ===== 進捗・スコア ===== */
+    .prog-row{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+    .prog-bar{flex:1;height:5px;background:#cbd5e1;border-radius:3px;}
+    .prog-fill{height:100%;background:#2563eb;border-radius:3px;transition:width .35s ease;}
+    .prog-text{font-size:12px;color:#64748b;white-space:nowrap;}
+    .score-row{text-align:right;font-size:13px;color:#64748b;margin-bottom:12px;}
+
+    .q-card{
+      background:#fff;border-radius:12px;padding:18px 20px;
+      margin-bottom:12px;box-shadow:0 1px 4px rgba(0,0,0,.09);
+      border-left:4px solid #2563eb;
+    }
+    .q-num{font-size:11px;font-weight:700;color:#2563eb;margin-bottom:7px;letter-spacing:.5px;}
+    .q-img{display:block;max-width:100%;width:340px;height:auto;border-radius:8px;margin-bottom:12px;border:1px solid #e2e8f0;background:#fff;}
+    .q-img.half{width:170px;}
+    .q-img.wide{width:100%;}
+    .q-imgs{display:flex;gap:10px;align-items:flex-start;margin-bottom:12px;}
+    .q-imgs .q-img{margin-bottom:0;flex:0 1 auto;min-width:0;max-width:calc(50% - 5px);}
+    .q-text{font-size:15px;line-height:1.75;}
+
+    .choices{display:flex;flex-direction:column;gap:8px;margin-bottom:12px;}
+    .choice-btn{
+      width:100%;padding:12px 16px;background:#fff;
+      border:2px solid #e2e8f0;border-radius:8px;cursor:pointer;
+      font-size:14px;text-align:left;color:#374151;
+      transition:all .15s;font-family:inherit;line-height:1.6;
+    }
+    .choice-btn:hover:not(:disabled){border-color:#93c5fd;background:#eff6ff;}
+    .choice-btn.correct{border-color:#34d399;background:#ecfdf5;color:#065f46;font-weight:600;}
+    .choice-btn.wrong{border-color:#f87171;background:#fef2f2;color:#991b1b;}
+    .choice-btn:disabled{cursor:default;}
+
+    .feedback{
+      padding:12px 16px;border-radius:8px;font-size:13px;
+      line-height:1.65;display:none;margin-bottom:12px;
+    }
+    .feedback.ok{display:block;background:#ecfdf5;border:1px solid #6ee7b7;color:#065f46;}
+    .feedback.ng{display:block;background:#fef2f2;border:1px solid #fca5a5;color:#991b1b;}
+    .fb-expl{display:inline-block;margin-top:6px;font-weight:400;color:#78350f;}
+
+    .next-btn{
+      width:100%;padding:13px;background:#2563eb;color:#fff;
+      border:none;border-radius:8px;font-size:15px;font-weight:600;
+      cursor:pointer;font-family:inherit;transition:background .2s;
+    }
+    .next-btn:hover{background:#1e3a8a;}
+
+    /* ===== 初学モード：解答・解説 ===== */
+    .intro-answer{
+      background:#ecfdf5;border:1px solid #6ee7b7;border-radius:10px;
+      padding:14px 18px;margin-bottom:14px;
+    }
+    .intro-answer-label{font-size:11px;font-weight:700;color:#059669;letter-spacing:.5px;margin-bottom:6px;}
+    .intro-answer-text{font-size:16px;font-weight:700;color:#065f46;margin-bottom:10px;line-height:1.6;}
+    .intro-expl{font-size:13.5px;line-height:1.75;color:#374151;border-top:1px dashed #a7f3d0;padding-top:10px;}
+    .intro-expl-icon{margin-right:4px;}
+
+    /* ===== 結果画面 ===== */
+    .result-card{
+      background:#fff;border-radius:16px;padding:40px 24px;
+      text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.1);
+    }
+    .result-emoji{font-size:56px;margin-bottom:14px;}
+    .result-score{font-size:56px;font-weight:800;color:#2563eb;line-height:1;}
+    .result-total{font-size:17px;color:#64748b;margin-bottom:6px;}
+    .result-pct{font-size:28px;font-weight:700;color:#374151;margin-bottom:28px;}
+    .retry-btn{
+      padding:12px 36px;background:#2563eb;color:#fff;border:none;
+      border-radius:8px;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;
+    }
+    .retry-btn:hover{background:#1e3a8a;}
+    .result-actions{display:flex;flex-direction:column;gap:10px;}
+
+    /* ===== 送信モード ===== */
+    .name-card{
+      background:#fff;border-radius:12px;padding:16px 20px;
+      margin-bottom:13px;box-shadow:0 1px 4px rgba(0,0,0,.08);
+    }
+    .name-label{font-size:13px;font-weight:600;color:#374151;margin-bottom:8px;display:block;}
+    .name-input{
+      width:100%;padding:10px 14px;border:2px solid #e2e8f0;
+      border-radius:8px;font-size:15px;font-family:inherit;
+      outline:none;color:#1a202c;transition:border-color .2s;
+    }
+    .name-input:focus{border-color:#2563eb;}
+
+    .sub-result{
+      padding:16px;border-radius:10px;text-align:center;
+      margin-bottom:16px;font-size:14px;line-height:1.8;
+    }
+    .sub-result.ok{background:#ecfdf5;border:1px solid #6ee7b7;color:#065f46;}
+    .sub-result.warn{background:#fffbeb;border:1px solid #fcd34d;color:#92400e;}
+
+    .sm-explanation{
+      display:flex;gap:10px;align-items:flex-start;
+      background:#fffbeb;border:1px solid #fcd34d;
+      border-radius:8px;padding:12px 14px;
+      font-size:13px;line-height:1.7;color:#78350f;
+      margin-bottom:12px;
+    }
+    .sm-expl-icon{font-size:18px;flex-shrink:0;margin-top:1px;}
+    .sm-final-card{
+      background:#fff;border-radius:16px;padding:36px 24px;
+      text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.1);
+    }
+    .sm-final-icon{font-size:52px;margin-bottom:12px;}
+    .sm-final-title{font-size:17px;font-weight:700;color:#1a202c;margin-bottom:6px;}
+    .sm-final-name{font-size:15px;color:#2563eb;font-weight:600;margin-bottom:20px;}
+    .sm-start-btn{
+      width:100%;padding:13px;background:#2563eb;color:#fff;border:none;
+      border-radius:8px;font-size:15px;font-weight:600;
+      cursor:pointer;font-family:inherit;margin-bottom:0;
+      transition:background .2s;
+    }
+    .sm-start-btn:hover{background:#1e3a8a;}
+    .submit-btn{
+      width:100%;padding:14px;background:#059669;color:#fff;border:none;
+      border-radius:8px;font-size:15px;font-weight:700;cursor:pointer;
+      font-family:inherit;margin-bottom:14px;transition:background .2s;
+    }
+    .submit-btn:hover{background:#047857;}
+    .submit-btn:disabled{background:#9ca3af;cursor:not-allowed;}
+
+    /* ===== 完了カード（初学モード） ===== */
+    .done-card{
+      background:#fff;border-radius:16px;padding:40px 24px;
+      text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.1);
+    }
+    .done-icon{font-size:52px;margin-bottom:14px;}
+    .done-title{font-size:18px;font-weight:700;color:#1a202c;margin-bottom:6px;}
+    .done-sub{font-size:13px;color:#64748b;margin-bottom:24px;}
+    .done-actions{display:flex;flex-direction:column;gap:10px;}
+
+    /* ===== 準備中 ===== */
+    .coming-card{
+      background:#fff;border-radius:16px;padding:50px 24px;
+      text-align:center;box-shadow:0 1px 4px rgba(0,0,0,.08);color:#6b7280;
+    }
+    .coming-icon{font-size:48px;margin-bottom:14px;}
+    .coming-title{font-size:18px;font-weight:600;color:#374151;margin-bottom:8px;}
+    .coming-text{font-size:14px;}
+
+    /* ===== 学習順/ランダム切替 ===== */
+    .order-row{
+      display:flex;align-items:center;gap:6px;margin-bottom:10px;
+    }
+    .order-label{font-size:12px;color:#64748b;margin-right:2px;white-space:nowrap;}
+    .order-btn{
+      padding:5px 14px;border-radius:20px;border:1.5px solid #cbd5e1;
+      background:#fff;color:#64748b;font-size:12px;font-weight:600;
+      cursor:pointer;font-family:inherit;transition:all .2s;
+    }
+    .order-btn.active{background:#2563eb;border-color:#2563eb;color:#fff;}
+    .order-btn:hover:not(.active){background:#f1f5f9;border-color:#93c5fd;}
+
+    /* KaTeX調整 */
+    .katex{font-size:1em;}
+    .katex-display{margin:.3em 0;}
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="hdr-school">神奈川県立湘南高等学校　物理</div>
+  <div class="hdr-title">🚀 速度と加速度の基本知識</div>
+  <div class="hdr-sub" id="hdrSub"></div>
+</header>
+
+<div class="tabs"><div class="tabs-inner" id="tabs"></div></div>
+
+<div class="main">
+  <div class="mode-row">
+    <button class="mode-btn" id="modeIntro"  onclick="setMode('intro')">🔰 初学モード</button>
+    <button class="mode-btn" id="modeStudy"  onclick="setMode('study')">📖 自習モード</button>
+    <button class="mode-btn" id="modeSubmit" onclick="setMode('submit')">📤 送信モード</button>
+  </div>
+  <div id="content"></div>
+</div>
+
+<script>
+// ============================================================
+// データ定義
+// choices[0] が常に正解。自習・送信モードでは表示時にシャッフルする。
+// ============================================================
+const SECTIONS = [
+  {
+    id: 1,
+    label: "基本知識",
+    subtitle: "変位・速度・加速度の定義",
+    available: true,
+    questions: [
+      { id: 1, text: "位置・座標の変化を何というか？",
+        choices: ["変位", "移動量", "道のり", "差分"] },
+      { id: 2, text: "物理量 \\(A\\) の変化量を表すとき、\\(A\\) の前につける記号は何か？",
+        choices: ["\\(\\Delta\\)", "\\(\\sigma\\)", "\\(\\Lambda\\)", "\\(\\Sigma\\)"] },
+      { id: 3, text: "速さと速度は同じ物理量か、違う物理量か？",
+        choices: ["違う物理量", "同じ物理量", "場合による", "定義による"] },
+      { id: 4, text: "大きさのみをもつ量を何というか？",
+        choices: ["スカラー", "ベクトル", "デカルト", "ガウス"] },
+      { id: 5, text: "大きさと向きをもつ量を何というか？",
+        choices: ["ベクトル", "スカラー", "デカルト", "ガウス"] },
+      { id: 6, text: "速度の定義を言葉で答えよ。",
+        choices: ["単位時間あたりの位置・座標の変化", "単位長さあたりの位置・座標の変化", "単位時間あたりの道のり", "単位長さあたりの時間"] },
+      { id: 7, text: "速度の（量）記号をアルファベットで答えよ。",
+        choices: ["\\(v\\)", "\\(a\\)", "\\(s\\)", "\\(t\\)"] },
+      { id: 8, text: "速度の定義式を選べ。",
+        choices: ["\\(v = \\dfrac{x_2 - x_1}{t_2 - t_1}\\)", "\\(v = \\dfrac{t_2 - t_1}{x_2 - x_1}\\)", "\\(v = \\dfrac{x_2 - t_2}{x_1 - t_1}\\)", "\\(v = \\dfrac{x^2 - x^1}{t^2 - t^1}\\)"] },
+      { id: 9, text: "\\(x\\)–\\(t\\) グラフの傾きに対応する物理量は何か？",
+        choices: ["速度", "位置・座標", "変位", "加速度", "移動距離"] },
+      { id: 10, text: "速度 \\(v_A\\) の A から、速度 \\(v_B\\) の B を観測したときの、A に対する B の相対速度 \\(v_{AB}\\) はどれか。",
+        choices: ["\\(v_{AB} = v_B - v_A\\)", "\\(v_{AB} = v_A - v_B\\)", "\\(v_{AB} = \\left|v_A - v_B\\right|\\)"] },
+      { id: 11, text: "加速度の定義を言葉で答えよ。",
+        choices: ["単位時間あたりの速度の変化", "単位時間あたりの速さの変化", "単位時間あたりの位置・座標の変化", "単位速度あたりの時間の変化"] },
+      { id: 12, text: "加速度の（量）記号をアルファベットで答えよ。",
+        choices: ["\\(a\\)", "\\(v\\)", "\\(s\\)", "\\(F\\)"] },
+      { id: 13, text: "加速度の単位を選べ。",
+        choices: ["\\(\\mathrm{m/s^2}\\)", "\\(\\mathrm{m/s}\\)", "\\(\\mathrm{m^2/s}\\)", "\\(\\mathrm{m^2/s^2}\\)"] },
+      { id: 14, text: "加速度を表すのは、どのグラフのどこか？",
+        choices: ["\\(v\\)-\\(t\\) グラフの傾き", "\\(x\\)-\\(t\\) グラフの傾き", "\\(v\\)-\\(t\\) グラフの面積", "\\(x\\)-\\(t\\) グラフの面積"] },
+      { id: 15, text: "加速度の定義式を選べ。",
+        choices: ["\\(a = \\dfrac{v_2 - v_1}{t_2 - t_1}\\)", "\\(a = \\dfrac{t_2 - t_1}{v_2 - v_1}\\)", "\\(a = \\dfrac{v_2 - t_2}{v_1 - t_1}\\)", "\\(a = \\dfrac{v^2 - v^1}{t^2 - t^1}\\)"] },
+      { id: 16, text: "運動を始めるときの速度（時刻 0 s における速度）を何というか。",
+        choices: ["初速度", "終端速度", "速度", "第一速度"] }
+    ]
+  },
+  {
+    id: 2,
+    label: "等加速度直線運動",
+    subtitle: "3つの公式の導出",
+    available: true,
+    questions: [
+      { id: 17, text: "初速度 \\(v_0\\) で運動する物体が、一定の加速度 \\(a\\) で \\(t\\) 秒間運動したところ速度が \\(v\\) になった。加速度の定義式から、\\(a\\) を \\(v,\\ v_0,\\ t\\) で表せ。",
+        choices: ["\\(a = \\dfrac{v - v_0}{t}\\)", "\\(a = \\dfrac{v_0 - v}{t}\\)", "\\(a = \\dfrac{t}{v - v_0}\\)", "\\(a = (v - v_0)t\\)"] },
+      { id: 18, text: "\\(a = \\dfrac{v - v_0}{t}\\) を、\\(v =\\) の形に変形せよ。",
+        choices: ["\\(v = v_0 + at\\)", "\\(v = v_0 - at\\)", "\\(v = at - v_0\\)", "\\(v = \\dfrac{v_0}{at}\\)"] },
+      { id: 19, text: "時刻 0 s に初速度 \\(v_0\\)、一定の加速度 \\(a\\) で運動を始めた物体の、時刻 \\(t\\) における速度 \\(v\\) を求める公式を選べ。",
+        choices: ["\\(v = v_0 + at\\)", "\\(v = v_0 + 2at\\)", "\\(v = v_0 + at^2\\)", "\\(v = v_0 + a + t\\)"] },
+      { id: 20, text: "\\(v\\)–\\(t\\) グラフの面積は、物体の運動における何を表すか？",
+        choices: ["移動距離", "速さ", "速度", "位置・座標"] },
+      { id: 21, text: "時刻 0 s に初速度 \\(v_0\\)、一定の加速度 \\(a\\) で \\(t\\) 秒間運動し、速度が \\(v\\) になった。移動距離 \\(x\\) は \\(v\\)-\\(t\\) グラフの面積に等しい。この面積を \\(v,\\ v_0,\\ t\\) で表せ。",
+        choices: ["\\(x = \\dfrac{(v + v_0)t}{2}\\)", "\\(x = (v + v_0)t\\)", "\\(x = \\dfrac{(v - v_0)t}{2}\\)", "\\(x = \\dfrac{v + v_0}{2t}\\)"] },
+      { id: 22, text: "\\(x = \\dfrac{(v + v_0)t}{2}\\) に \\(v = v_0 + at\\) を代入して整理せよ。",
+        choices: ["\\(x = v_0 t + \\dfrac{1}{2}at^2\\)", "\\(x = v_0 t + \\dfrac{1}{2}at\\)", "\\(x = v_0 t + at^2\\)", "\\(x = \\dfrac{1}{2}(v_0 + a)t^2\\)"] },
+      { id: 23, text: "時刻 0 s に初速度 \\(v_0\\)、一定の加速度 \\(a\\) で運動を始めた物体の、時刻 \\(t\\) における位置 \\(x\\) を求める公式を選べ。",
+        choices: ["\\(x = v_0 t + \\dfrac{1}{2}at^2\\)", "\\(x = v_0 t + at^2\\)", "\\(x = v_0 t + \\dfrac{1}{2}at\\)", "\\(x = v_0 + \\dfrac{1}{2}at^2\\)"] },
+      { id: 24, text: "公式1 \\(v = v_0 + at\\) を \\(t =\\) に変形して公式2 \\(x = v_0 t + \\dfrac{1}{2}at^2\\) に代入し、整理するとどうなるか。",
+        choices: ["\\(v^2 - v_0^2 = 2ax\\)", "\\(v^2 - v_0^2 = 2at\\)", "\\(v^2 + v_0^2 = 2ax\\)", "\\(v - v_0 = 2ax\\)"] },
+      { id: 25, text: "初速度 \\(v_0\\)、一定の加速度 \\(a\\) で運動する物体の、位置 \\(x\\) と速度 \\(v\\) の関係を表す公式を選べ。",
+        choices: ["\\(v^2 - v_0^2 = 2ax\\)", "\\(v^2 - v_0^2 = ax\\)", "\\(v^2 - v_0^2 = 2at\\)", "\\(v^2 + v_0^2 = 2ax\\)"] }
+    ]
+  },
+  {
+    id: 3,
+    label: "落体の運動",
+    subtitle: "自由落下・投射運動",
+    available: true,
+    questions: [
+      { id: 26, text: "重力がはたらく空間で、初速度 0 m/s で落下を始めた物体の運動を何というか。（空気抵抗は無視）",
+        choices: ["自由落下", "水平投射", "鉛直投げ上げ", "鉛直投げ下ろし"] },
+      { id: 27, text: "重力がはたらく空間で、ある初速度で真下に投げ下ろした物体の運動を何というか。（空気抵抗は無視）",
+        choices: ["鉛直投げ下ろし", "水平投射", "鉛直投げ上げ", "自由落下"] },
+      { id: 28, text: "重力がはたらく空間で、ある初速度で水平方向に投げたときの物体の運動を何というか。（空気抵抗は無視）",
+        choices: ["水平投射", "鉛直投げ下ろし", "鉛直投げ上げ", "斜方投射"] },
+      { id: 29, text: "重力がはたらく空間で、ある初速度で斜め上方に投げたときの物体の運動を何というか。（空気抵抗は無視）",
+        choices: ["斜方投射", "鉛直投げ下ろし", "鉛直投げ上げ", "水平投射"] },
+      { id: 30, text: "質量 1 kg の物体と 2 kg の物体を同じ高さから自由落下させた。先に着地するのはどちらか。（空気抵抗は無視）",
+        choices: ["同じ", "1 kg", "2 kg"] },
+      { id: 31, text: "同じ高さから、1 kg の物体を自由落下させ、2 kg の物体を 10 m/s で水平投射した。先に着地するのはどちらか。（空気抵抗は無視）",
+        choices: ["同じ", "1 kg（自由落下）", "2 kg（水平投射）"] },
+      { id: 32, text: "月面上の重力は、地球の地表付近での重力のおよそ何倍か。",
+        choices: ["6分の1倍", "6倍", "4倍", "2分の1倍"] },
+      { id: 33, text: "同じ高さから同じ質量の物体を、月面上と地球上で落下させた。遅く着地するのはどちらか。",
+        choices: ["月面", "地球", "同じ"] },
+      { id: 34, text: "仰角 \\(\\theta\\)、初速度 \\(v_0\\) で物体を投げた。初速度の水平成分はいくらか。",
+        choices: ["\\(v_0\\cos\\theta\\)", "\\(v_0\\sin\\theta\\)", "\\(\\dfrac{v_0}{\\sin\\theta}\\)", "\\(\\dfrac{v_0}{\\cos\\theta}\\)"] },
+      { id: 35, text: "仰角 \\(\\theta\\)、初速度 \\(v_0\\) で物体を投げた。初速度の鉛直成分はいくらか。",
+        choices: ["\\(v_0\\sin\\theta\\)", "\\(v_0\\cos\\theta\\)", "\\(\\dfrac{v_0}{\\sin\\theta}\\)", "\\(\\dfrac{v_0}{\\cos\\theta}\\)"] },
+      { id: 36, text: "仰角 \\(\\theta\\)、初速度 \\(v_0\\) で物体を投げた。最高点での物体の速さはいくらか。",
+        choices: ["\\(v_0\\cos\\theta\\)", "\\(0\\)", "\\(v_0\\sin\\theta\\)", "\\(\\dfrac{v_0}{\\sin\\theta}\\)"] },
+      { id: 37, text: "時刻 0 s に仰角 \\(\\theta\\)、初速度 \\(v_0\\) で物体を投げた。最高点に達する時刻はいつか。重力加速度の大きさを \\(g\\) とする。",
+        choices: ["\\(\\dfrac{v_0\\sin\\theta}{g}\\)", "\\(\\dfrac{v_0\\cos\\theta}{g}\\)", "\\(\\dfrac{v_0}{g\\sin\\theta}\\)", "\\(\\dfrac{v_0}{g\\cos\\theta}\\)"] },
+      { id: 38, text: "時刻 0 s に地面（高さ 0 m）から仰角 \\(\\theta\\)、初速度 \\(v_0\\) で物体を投げた。水平到達距離はいくらか。重力加速度の大きさを \\(g\\) とする。",
+        choices: ["\\(\\dfrac{2v_0^2\\sin\\theta\\cos\\theta}{g}\\)", "\\(\\dfrac{v_0^2\\sin\\theta\\cos\\theta}{g}\\)", "\\(\\dfrac{2v_0\\sin\\theta\\cos\\theta}{g}\\)", "\\(\\dfrac{2v_0^2\\sin^2\\theta\\cos^2\\theta}{g}\\)"] }
+    ]
+  }
+];
+
+// ============================================================
+// 各問題の解説文
+// ============================================================
+const EXPLANATIONS = {
+  1 : "位置がどこからどこへ変わったかを表す量を<strong>変位</strong>という。始点と終点だけで決まり、向きをもつベクトル量である。実際に通った経路の長さである「道のり」とは区別する。",
+  2 : "ギリシャ文字の大文字デルタ \\(\\Delta\\) を使い、\\(\\Delta A = A_2 - A_1\\)（後の値 − 前の値）を表す。\\(\\Sigma\\) は和、\\(\\sigma\\) は標準偏差などに使う別の記号である。",
+  3 : "<strong>速さはスカラー、速度はベクトル</strong>である。速度は大きさに加えて向きをもち、その大きさが速さにあたる。往復して元の位置に戻った場合、平均の速度は 0 だが平均の速さは 0 にならない。",
+  4 : "質量・時間・道のり・速さなど、数値だけで決まる量を<strong>スカラー</strong>という。",
+  5 : "変位・速度・加速度・力などは<strong>ベクトル</strong>で、大きさと向きの両方を指定しないと決まらない。計算では正負の符号や成分分解で向きを扱う。",
+  6 : "速度は<strong>単位時間あたりの位置（座標）の変化</strong>、すなわち単位時間あたりの変位である。「道のり」で定義すると速さになってしまう点に注意する。",
+  7 : "速度は velocity の頭文字をとって \\(v\\) で表す。速さも同じ \\(v\\) を使うため、文脈で区別する。",
+  8 : "\\(v=\\dfrac{\\Delta x}{\\Delta t}=\\dfrac{x_2-x_1}{t_2-t_1}\\)。「変化した位置 ÷ かかった時間」であり、分母と分子を逆にしないよう気をつける。",
+  9 : "傾きは \\(\\dfrac{\\Delta x}{\\Delta t}\\) そのものなので<strong>速度</strong>を表す。傾きが急なほど速く、傾きが負なら負の向きに進んでいる。",
+  10 : "「<strong>見られるもの − 見るもの</strong>」の順で引く。添字 \\(AB\\) は「A から見た B」を意味するので、後ろの B から前の A を引く、と覚えるとよい。",
+  11 : "加速度は<strong>単位時間あたりの速度の変化</strong>である。速度はベクトルなので、速さが一定でも向きが変われば加速度は 0 ではない（等速円運動がその例）。",
+  12 : "加速度は acceleration の頭文字をとって \\(a\\) で表す。",
+  13 : "速度 \\(\\mathrm{m/s}\\) を時間 \\(\\mathrm{s}\\) で割るので \\(\\mathrm{m/s^2}\\)（メートル毎秒毎秒）となる。「1 秒あたり速度が何 m/s ずつ変わるか」を表している。",
+  14 : "\\(v\\)-\\(t\\) グラフの傾きは \\(\\dfrac{\\Delta v}{\\Delta t}\\) なので加速度を表す。<strong>面積は移動距離</strong>を表すので混同しないこと。",
+  15 : "\\(a=\\dfrac{\\Delta v}{\\Delta t}=\\dfrac{v_2-v_1}{t_2-t_1}\\)。速度の定義式で \\(x\\) を \\(v\\) に置き換えた形になっている。",
+  16 : "時刻 \\(t=0\\) での速度を<strong>初速度</strong>といい \\(v_0\\) と書く。等加速度直線運動の公式ではすべての式に登場する基準量である。",
+  17 : "加速度の定義 \\(a=\\dfrac{\\Delta v}{\\Delta t}\\) に、\\(\\Delta v = v - v_0\\)、\\(\\Delta t = t - 0 = t\\) を代入するだけである。ここがすべての公式の出発点になる。",
+  18 : "両辺に \\(t\\) を掛けて \\(at = v - v_0\\)、移項して \\(v = v_0 + at\\)。これが<strong>公式1</strong>である。「はじめの速度に、増えたぶん \\(at\\) を足す」と読める。",
+  19 : "等加速度直線運動の<strong>公式1</strong>。\\(v\\)-\\(t\\) グラフでは、切片が \\(v_0\\)、傾きが \\(a\\) の直線にあたる。",
+  20 : "「速度 × 時間」が面積にあたるので<strong>移動距離（変位）</strong>を表す。速度が負の区間では面積も負として扱い、変位を求めることになる。",
+  21 : "グラフは上底 \\(v_0\\)、下底 \\(v\\)、高さ \\(t\\) の台形になる。台形の面積 \\(\\dfrac{(\\text{上底}+\\text{下底})\\times\\text{高さ}}{2}\\) から \\(x=\\dfrac{(v+v_0)t}{2}\\) が得られる。",
+  22 : "\\(x=\\dfrac{\\{(v_0+at)+v_0\\}t}{2}=\\dfrac{(2v_0+at)t}{2}=v_0t+\\dfrac{1}{2}at^2\\)。これが<strong>公式2</strong>である。",
+  23 : "等加速度直線運動の<strong>公式2</strong>。第1項が「そのままの速さで進んだぶん」、第2項が「加速によって余分に進んだぶん」にあたる。",
+  24 : "\\(t=\\dfrac{v-v_0}{a}\\) を代入して整理すると \\(t\\) が消え、\\(v^2-v_0^2=2ax\\) が残る。<strong>時間が分からない問題で使う</strong>のがこの式の役割である。",
+  25 : "等加速度直線運動の<strong>公式3</strong>。3つの公式のうち、これだけが時間 \\(t\\) を含まない。",
+  26 : "初速度 0 で落ちる運動を<strong>自由落下</strong>という。等加速度直線運動の公式で \\(v_0=0\\)、\\(a=g\\) とした場合にあたる。",
+  27 : "下向きの初速度をもつ落下運動を<strong>鉛直投げ下ろし</strong>という。\\(v_0\\neq 0\\)、\\(a=g\\) の等加速度直線運動である。",
+  28 : "<strong>水平投射</strong>は、水平方向が等速直線運動、鉛直方向が自由落下という2つの運動の組み合わせとして扱う。",
+  29 : "<strong>斜方投射</strong>も、水平方向は等速直線運動、鉛直方向は鉛直投げ上げに分解して考える。軌道は放物線になる。",
+  30 : "空気抵抗がなければ、落下の加速度は質量によらず \\(g\\) で等しい。よって<strong>同時に着地する</strong>。重い物体ほど重力は大きいが、動かしにくさ（慣性）も同じ割合で大きくなるため打ち消し合う。",
+  31 : "水平方向の速度は鉛直方向の運動に影響しない。どちらも鉛直方向は初速度 0 の自由落下なので、<strong>同時に着地する</strong>。水平投射を「水平と鉛直に分解して考える」ことの意味がよく分かる例である。",
+  32 : "月の重力加速度は約 \\(1.6\\,\\mathrm{m/s^2}\\) で、地球の \\(9.8\\,\\mathrm{m/s^2}\\) の<strong>およそ 6 分の 1</strong> である。月面で宇宙飛行士がゆっくり跳ねて見えるのはこのためである。",
+  33 : "\\(h=\\dfrac{1}{2}gt^2\\) より \\(t=\\sqrt{\\dfrac{2h}{g}}\\)。\\(g\\) が小さいほど時間は長くなるので、\\(g\\) が約 6 分の 1 の<strong>月面のほうが遅く着地する</strong>（時間は約 \\(\\sqrt{6}\\approx 2.4\\) 倍）。",
+  34 : "斜辺 \\(v_0\\)、角 \\(\\theta\\) の直角三角形で、水平成分は \\(\\theta\\) に<strong>隣り合う辺</strong>なので \\(v_0\\cos\\theta\\) となる。",
+  35 : "鉛直成分は \\(\\theta\\) の<strong>向かい側の辺</strong>なので \\(v_0\\sin\\theta\\) となる。",
+  36 : "最高点で 0 になるのは<strong>鉛直成分だけ</strong>である。水平成分 \\(v_0\\cos\\theta\\) は重力の影響を受けず変化しないので、これが最高点での速さになる。0 と答えるのがよくある誤り。",
+  37 : "鉛直方向について \\(v=v_0\\sin\\theta-gt\\) とおき、最高点の条件 \\(v=0\\) を解くと \\(t=\\dfrac{v_0\\sin\\theta}{g}\\) が得られる。",
+  38 : "滞空時間は最高点までの 2 倍で \\(\\dfrac{2v_0\\sin\\theta}{g}\\)。これに水平成分 \\(v_0\\cos\\theta\\) を掛けて \\(\\dfrac{2v_0^2\\sin\\theta\\cos\\theta}{g}\\)。\\(2\\sin\\theta\\cos\\theta=\\sin 2\\theta\\) より \\(\\theta=45^\\circ\\) で最大になる。"
+};
+
+// ============================================================
+// 状態管理
+// ============================================================
+let curSec    = 1;
+let curMode   = 'study';   // 'intro' | 'study' | 'submit'
+let orderMode = 'seq';     // 自習モードの出題順　'seq'=学習順  'rand'=ランダム
+
+const im = {          // 初学モード状態
+  secId : null,
+  idx   : 0
+};
+
+const ss = {           // 自習モード状態
+  secId    : null,
+  qs       : [],
+  idx      : 0,
+  answered : false,
+  correct  : 0,
+  wrong    : 0,
+  chosen   : []
+};
+
+const sm = {           // 送信モード状態
+  secId   : null,
+  num     : '',
+  name    : '',
+  started : false,
+  idx     : 0,
+  answered: false,
+  answers : {},
+  chosen  : []
+};
+
+// ============================================================
+// ユーティリティ
+// ============================================================
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function imgTag(q) {
+  if (!q.image) return '';
+  const list = Array.isArray(q.image) ? q.image : [q.image];
+  const cls  = q.imgSize ? 'q-img ' + q.imgSize : 'q-img';
+  const tags = list.map(src => `<img class="${cls}" src="${src}" alt="図${q.id}">`).join('');
+  return list.length > 1 ? `<div class="q-imgs">${tags}</div>` : tags;
+}
+
+function doMath(el) {
+  if (window.renderMathInElement) {
+    renderMathInElement(el, {
+      delimiters: [
+        { left: '\\(', right: '\\)', display: false },
+        { left: '\\[', right: '\\]', display: true  }
+      ],
+      throwOnError: false
+    });
+  }
+}
+
+// ============================================================
+// タブ・モード
+// ============================================================
+function buildTabs() {
+  document.getElementById('tabs').innerHTML = SECTIONS.map(s => `
+    <div class="tab ${s.id === curSec ? 'active' : ''} ${!s.available ? 'disabled' : ''}"
+         onclick="${s.available ? `setSec(${s.id})` : ''}">
+      ${s.label}
+    </div>
+  `).join('');
+}
+
+function setSec(id) {
+  curSec      = id;
+  im.secId    = null;  // セクション変更→各モードの状態をリセット
+  ss.secId    = null;
+  sm.started  = false;
+  buildTabs();
+  render();
+}
+
+function setMode(mode) {
+  curMode = mode;
+  document.getElementById('modeIntro' ).classList.toggle('active', mode === 'intro' );
+  document.getElementById('modeStudy' ).classList.toggle('active', mode === 'study' );
+  document.getElementById('modeSubmit').classList.toggle('active', mode === 'submit');
+  render();
+}
+
+// ============================================================
+// メインレンダー
+// ============================================================
+function render() {
+  const sec = SECTIONS.find(s => s.id === curSec);
+  document.getElementById('hdrSub').textContent = sec.subtitle || '';
+
+  if (!sec.available) {
+    document.getElementById('content').innerHTML = `
+      <div class="coming-card">
+        <div class="coming-icon">🔧</div>
+        <div class="coming-title">準備中</div>
+        <div class="coming-text">${sec.label} は現在準備中です。</div>
+      </div>`;
+    return;
+  }
+
+  if      (curMode === 'intro')  renderIntro(sec);
+  else if (curMode === 'study')  renderStudy(sec);
+  else                            renderSubmit(sec);
+}
+
+// ============================================================
+// 初学モード：選択肢なし、解答・解説をはじめから表示
+// ============================================================
+function renderIntro(sec) {
+  if (im.secId !== sec.id) {
+    im.secId = sec.id;
+    im.idx   = 0;
+  }
+  if (im.idx >= sec.questions.length) {
+    renderIntroDone(sec);
+    return;
+  }
+
+  const q     = sec.questions[im.idx];
+  const total = sec.questions.length;
+  const pct   = Math.round((im.idx / total) * 100);
+  const expl  = EXPLANATIONS[q.id] || '';
+
+  const el = document.getElementById('content');
+  el.innerHTML = `
+    <div class="prog-row">
+      <div class="prog-bar"><div class="prog-fill" style="width:${pct}%"></div></div>
+      <div class="prog-text">${im.idx + 1} / ${total}</div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-num">問 ${q.id}</div>
+      ${imgTag(q)}
+      <div class="q-text">${q.text}</div>
+    </div>
+
+    <div class="intro-answer">
+      <div class="intro-answer-label">✅ 解答</div>
+      <div class="intro-answer-text">${q.choices[0]}</div>
+      <div class="intro-expl"><span class="intro-expl-icon">💡</span>${expl}</div>
+    </div>
+
+    <button class="next-btn" onclick="nextIntroQ()">
+      ${im.idx + 1 < total ? '次の問題 →' : '✅ セクション修了 →'}
+    </button>
+  `;
+
+  doMath(el);
+}
+
+function nextIntroQ() {
+  im.idx++;
+  renderIntro(SECTIONS.find(s => s.id === curSec));
+}
+
+function renderIntroDone(sec) {
+  document.getElementById('content').innerHTML = `
+    <div class="done-card">
+      <div class="done-icon">🎓</div>
+      <div class="done-title">${sec.label}（${sec.subtitle}）の学習が終わりました</div>
+      <div class="done-sub">全 ${sec.questions.length} 問を確認しました。次は自習モードで理解度を確かめましょう。</div>
+      <div class="done-actions">
+        <button class="next-btn" onclick="restartIntro()">🔄 もう一度読み直す</button>
+        <button class="next-btn" style="background:#059669;" onclick="setMode('study')">📖 自習モードへ進む</button>
+      </div>
+    </div>`;
+}
+
+function restartIntro() {
+  im.idx = 0;
+  renderIntro(SECTIONS.find(s => s.id === curSec));
+}
+
+// ============================================================
+// 自習モード（4択・即時採点）
+// ============================================================
+function setOrderMode(mode) {
+  orderMode   = mode;
+  ss.secId    = null; // 切替時に出題をリセット
+  ss.chosen   = [];
+  render();
+}
+
+function startStudy(sec) {
+  ss.secId    = sec.id;
+  ss.qs       = orderMode === 'rand'
+                  ? shuffle(sec.questions)
+                  : [...sec.questions]; // 学習順：問1から順番
+  ss.idx      = 0;
+  ss.answered = false;
+  ss.correct  = 0;
+  ss.wrong    = 0;
+  ss.chosen   = [];
+  renderStudy(sec);
+}
+
+function renderStudy(sec) {
+  if (ss.secId !== sec.id || ss.qs.length === 0) {
+    startStudy(sec);
+    return;
+  }
+  if (ss.idx >= ss.qs.length) {
+    renderResult(sec);
+    return;
+  }
+
+  const q     = ss.qs[ss.idx];
+  const total = ss.qs.length;
+  const pct   = Math.round((ss.idx / total) * 100);
+
+  if (ss.chosen.length === 0) {
+    ss.chosen = shuffle(q.choices.map((_, i) => i));
+  }
+
+  const el = document.getElementById('content');
+  el.innerHTML = `
+    <div class="order-row">
+      <span class="order-label">出題順：</span>
+      <button class="order-btn ${orderMode === 'seq'  ? 'active' : ''}"
+              onclick="setOrderMode('seq')">学習順</button>
+      <button class="order-btn ${orderMode === 'rand' ? 'active' : ''}"
+              onclick="setOrderMode('rand')">ランダム</button>
+    </div>
+    <div class="prog-row">
+      <div class="prog-bar"><div class="prog-fill" style="width:${pct}%"></div></div>
+      <div class="prog-text">${ss.idx + 1} / ${total}</div>
+    </div>
+    <div class="score-row" id="scoreRow">✅ ${ss.correct} &nbsp;❌ ${ss.wrong}</div>
+
+    <div class="q-card">
+      <div class="q-num">問 ${q.id}</div>
+      ${imgTag(q)}
+      <div class="q-text">${q.text}</div>
+    </div>
+
+    <div class="choices" id="clist">
+      ${ss.chosen.map((ci, pos) => `
+        <button class="choice-btn" id="cb${pos}" onclick="pick(${pos})"
+                ${ss.answered ? 'disabled' : ''}>
+          ${q.choices[ci]}
+        </button>`).join('')}
+    </div>
+
+    <div class="feedback" id="fb"></div>
+
+    <button class="next-btn" id="nb" onclick="nextQ()" style="display:none;">
+      ${ss.idx + 1 < total ? '次の問題 →' : '結果を見る →'}
+    </button>
+  `;
+
+  doMath(el);
+}
+
+function pick(pos) {
+  if (ss.answered) return;
+  ss.answered = true;
+
+  const q         = ss.qs[ss.idx];
+  const isCorrect = ss.chosen[pos] === 0;
+
+  if (isCorrect) ss.correct++;
+  else           ss.wrong++;
+
+  ss.chosen.forEach((ci, p) => {
+    const btn = document.getElementById(`cb${p}`);
+    if (!btn) return;
+    btn.disabled = true;
+    if (ci === 0)       btn.classList.add('correct');
+    else if (p === pos) btn.classList.add('wrong');
+  });
+
+  const fb   = document.getElementById('fb');
+  const expl = EXPLANATIONS[q.id] || '';
+  if (isCorrect) {
+    fb.className = 'feedback ok';
+    fb.innerHTML = `✅ 正解です！${expl ? `<br><span class="fb-expl">💡 ${expl}</span>` : ''}`;
+  } else {
+    fb.className = 'feedback ng';
+    fb.innerHTML = `❌ 不正解。正解は「${q.choices[0]}」です。${expl ? `<br><span class="fb-expl">💡 ${expl}</span>` : ''}`;
+  }
+  doMath(fb);
+
+  document.getElementById('scoreRow').innerHTML = `✅ ${ss.correct} &nbsp;❌ ${ss.wrong}`;
+  document.getElementById('nb').style.display = 'block';
+}
+
+function nextQ() {
+  ss.idx++;
+  ss.answered = false;
+  ss.chosen   = [];
+  renderStudy(SECTIONS.find(s => s.id === curSec));
+}
+
+function renderResult(sec) {
+  const total = ss.qs.length;
+  const c     = ss.correct;
+  const pct   = Math.round((c / total) * 100);
+  const emoji = pct >= 90 ? '🎉' : pct >= 70 ? '👍' : pct >= 50 ? '🤔' : '😢';
+
+  document.getElementById('content').innerHTML = `
+    <div class="result-card">
+      <div class="result-emoji">${emoji}</div>
+      <div class="result-score">${c}</div>
+      <div class="result-total">/ ${total} 問正解</div>
+      <div class="result-pct">正答率 ${pct}%</div>
+      <div class="result-actions">
+        <button class="retry-btn"
+                onclick="startStudy(SECTIONS.find(s=>s.id===${curSec}))">
+          🔄 もう一度やり直す
+        </button>
+      </div>
+    </div>`;
+}
+
+// ============================================================
+// 送信モード
+// ============================================================
+function renderSubmit(sec) {
+  if (sm.secId !== sec.id || !sm.started) {
+    renderSubmitIntro(sec);
+    return;
+  }
+  if (sm.idx >= sec.questions.length) {
+    renderSubmitFinal(sec);
+    return;
+  }
+  renderSubmitQuestion(sec);
+}
+
+/* ── 氏名入力画面 ── */
+function renderSubmitIntro(sec) {
+  document.getElementById('content').innerHTML = `
+    <div class="name-card">
+      <label class="name-label" for="snum">組番号を入力してください</label>
+      <input type="text" class="name-input" id="snum"
+             placeholder="例：A01～E40"
+             value="${sm.secId === sec.id ? sm.num : ''}">
+    </div>
+    <div class="name-card">
+      <label class="name-label" for="sname">氏名を入力してください</label>
+      <input type="text" class="name-input" id="sname"
+             placeholder="例：湘南 太郎"
+             value="${sm.secId === sec.id ? sm.name : ''}">
+    </div>
+    <button class="sm-start-btn" onclick="startSubmitQuiz(${sec.id})">
+      ✏️ 回答を開始する（全 ${sec.questions.length} 問）
+    </button>`;
+}
+
+function startSubmitQuiz(secId) {
+  const num  = document.getElementById('snum').value.trim();
+  const name = document.getElementById('sname').value.trim();
+  if (!num)  { alert('組番号を入力してください。'); return; }
+  if (!name) { alert('氏名を入力してください。');   return; }
+  sm.secId    = secId;
+  sm.num      = num;
+  sm.name     = name;
+  sm.started  = true;
+  sm.startedAt = Date.now();   // 所要時間の計測用
+  sm.idx      = 0;
+  sm.answered = false;
+  sm.answers  = {};
+  sm.chosen   = [];
+  renderSubmit(SECTIONS.find(s => s.id === secId));
+}
+
+/* ── 一問表示 ── */
+function renderSubmitQuestion(sec) {
+  const q     = sec.questions[sm.idx];
+  const total = sec.questions.length;
+  const pct   = Math.round((sm.idx / total) * 100);
+
+  if (sm.chosen.length === 0) {
+    sm.chosen = shuffle(q.choices.map((_, i) => i));
+  }
+
+  const expl       = EXPLANATIONS[q.id] || '';
+  const selectedCi = sm.answers[q.id];
+
+  const el = document.getElementById('content');
+  el.innerHTML = `
+    <div class="prog-row">
+      <div class="prog-bar"><div class="prog-fill" style="width:${pct}%"></div></div>
+      <div class="prog-text">${sm.idx + 1} / ${total}</div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-num">問 ${q.id}</div>
+      ${imgTag(q)}
+      <div class="q-text">${q.text}</div>
+    </div>
+
+    <div class="choices">
+      ${sm.chosen.map((ci, pos) => {
+        let cls = '';
+        if (sm.answered) {
+          if (ci === 0)                           cls = 'correct';
+          else if (ci === selectedCi && ci !== 0) cls = 'wrong';
+        }
+        return `
+          <button class="choice-btn ${cls}" id="smcb${pos}"
+                  onclick="pickSubmit(${pos})"
+                  ${sm.answered ? 'disabled' : ''}>
+            ${q.choices[ci]}
+          </button>`;
+      }).join('')}
+    </div>
+
+    ${sm.answered ? `
+      <div class="sm-explanation">
+        <span class="sm-expl-icon">💡</span>
+        <span>${expl}</span>
+      </div>
+      <button class="next-btn" onclick="nextSubmitQ()">
+        ${sm.idx + 1 < total ? '次の問題 →' : '✅ 送信画面へ →'}
+      </button>
+    ` : ''}
+  `;
+
+  doMath(el);
+}
+
+function pickSubmit(pos) {
+  if (sm.answered) return;
+  sm.answered = true;
+  const sec = SECTIONS.find(s => s.id === sm.secId);
+  const q   = sec.questions[sm.idx];
+  sm.answers[q.id] = sm.chosen[pos];
+  renderSubmitQuestion(sec);
+}
+
+function nextSubmitQ() {
+  sm.idx++;
+  sm.answered = false;
+  sm.chosen   = [];
+  renderSubmit(SECTIONS.find(s => s.id === sm.secId));
+}
+
+/* ── 送信確認画面 ── */
+function renderSubmitFinal(sec) {
+  document.getElementById('content').innerHTML = `
+    <div class="sm-final-card">
+      <div class="sm-final-icon">📝</div>
+      <div class="sm-final-title">全 ${sec.questions.length} 問の回答が完了しました</div>
+      <div class="sm-final-name">${sm.name} さん</div>
+      <button class="submit-btn" id="sbtn" onclick="doSubmit(${sec.id})">
+        📤 回答を送信する
+      </button>
+      <div id="sresult"></div>
+    </div>`;
+}
+
+// ============================================================
+//  記録送信（学習記録ハブ  スキーマ v1）
+// ============================================================
+// ハブGASのデプロイURL
+const HUB_URL = 'https://script.google.com/macros/s/AKfycbwnV8z1aoFsLF0NEEgFXZEVktKKNVqm8Fnvrm4Z772M1df-VZKJRAljAZBHgRkInIVX/exec';
+
+// 単元マスタ.xlsx「アプリ設定」シートの kinematics の行から転記
+const APP_ID  = 'kinematics';
+const UNIT_ID = 'MEC01';
+// ★配列の並びはタブ（基本知識・等加速度直線運動・落体の運動）と一致させること
+const SEC_IDS = ['MEC01-S1', 'MEC01-S2', 'MEC01-S3'];
+
+// 移行期のみ true。旧スプレッドシートにも同じ内容を送る。
+// ハブ側で記録できていることを確認したら false にする。
+const SEND_LEGACY = false;   // 新規アプリなので旧送信先なし
+const GAS_URL = '';
+
+let _sub = null;   // 直前の送信内容（結果表示用）
+
+/* このアプリは sm.answers[問題ID] に「選んだ選択肢の元index」を持ち、0 が正解 */
+function isCorrect_(qid) { return sm.answers[qid] === 0; }
+
+function doSubmit(secId) {
+  const sec     = SECTIONS.find(s => s.id === secId);
+  const qids    = sec.questions.map(q => q.id);
+  const correct = qids.filter(isCorrect_).length;
+  const elapsed = sm.startedAt ? Math.round((Date.now() - sm.startedAt) / 1000) : 0;
+
+  _sub = { num: sm.num, name: sm.name, correct, total: qids.length };
+
+  if (!HUB_URL && !(SEND_LEGACY && GAS_URL)) {
+    document.getElementById('sresult').innerHTML = `
+      <div class="sub-result warn">
+        ⚠️ 送信先が未設定です。<br>
+        <strong>${sm.num}　${sm.name}</strong> さんの得点：<strong>${correct} / ${_sub.total}</strong>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px;margin-top:12px;">
+        <button class="next-btn" onclick="setMode('study')">📖 自習モードで学習する</button>
+      </div>`;
+    return;
+  }
+
+  const btn = document.getElementById('sbtn');
+  if (btn) { btn.disabled = true; btn.textContent = '📤 送信中…'; }
+
+  sendRecord(sec, qids, correct, elapsed).then(ok => showSubmitResult(ok, btn));
+}
+
+/* ── ハブ（＋移行期は旧GAS）へ送信 ── */
+async function sendRecord(sec, qids, correct, elapsed) {
+  const marks = qids.map(id => (isCorrect_(id) ? '1' : '0')).join('');
+  let ok = null;
+
+  if (HUB_URL) {
+    const secId = SEC_IDS[sec.id - 1];
+    if (!secId) {
+      console.error('SEC_IDS に ' + sec.label + ' の定義がありません');
+    } else {
+      const p = new URLSearchParams();
+      p.set('v',       '1');
+      p.set('app',     APP_ID);
+      p.set('unit',    UNIT_ID);
+      p.set('sec',     secId);          // ★恒久ID。単元マスタとの結合キー
+      p.set('section', sec.label);      // 保険（マスタ側の名前が優先される）
+      p.set('cls',     sm.num);         // 組番号 → 名簿で生徒IDに解決される
+      p.set('name',    sm.name);
+      p.set('mode',    '送信');
+      p.set('qids',    qids.join(','));
+      p.set('marks',   marks);          // 例 "1011…"（○×より遥かに短い）
+      p.set('elapsed', String(elapsed));
+      p.set('comment', '');
+      ok = await beacon(HUB_URL + '?' + p.toString());
+    }
+  }
+
+  if (SEND_LEGACY && GAS_URL) {
+    const q = new URLSearchParams({
+      num      : sm.num,
+      name     : sm.name,
+      section  : sec.label,
+      correct  : String(correct),
+      total    : String(qids.length),
+      qids     : qids.join(','),
+      timestamp: new Date().toLocaleString('ja-JP')
+    });
+    qids.forEach(id => q.append('q' + id, isCorrect_(id) ? '○' : '×'));
+    const ok2 = await beacon(GAS_URL + '?' + q.toString());
+    if (ok === null) ok = ok2;
+  }
+
+  return ok === true;
+}
+
+/* ── 画像ビーコン方式（CSP・CORSの影響を受けにくい）／最大3回試行 ── */
+function beacon(url) {
+  const MAX_RETRY = 3;
+  return (async () => {
+    for (let i = 0; i < MAX_RETRY; i++) {
+      const btn = document.getElementById('sbtn');
+      if (btn && i > 0) btn.textContent = `🔄 再送信中… (${i + 1}/${MAX_RETRY})`;
+      const reached = await new Promise(resolve => {
+        const img   = new Image();
+        const timer = setTimeout(() => resolve(false), 6000);
+        img.onload  = () => { clearTimeout(timer); resolve(true); };
+        img.onerror = () => { clearTimeout(timer); resolve(true); };  // 到達はしている
+        img.src = url;
+      });
+      if (reached) return true;
+      await new Promise(r => setTimeout(r, 1500));
+    }
+    return false;
+  })();
+}
+
+/* ── 結果表示 ── */
+function showSubmitResult(ok, btn) {
+  const { num, name, correct, total } = _sub;
+  const el = document.getElementById('sresult');
+  if (!el) return;
+
+  if (ok) {
+    el.innerHTML = `
+      <div class="sub-result ok">
+        ✅ 送信完了しました。お疲れ様でした！<br>
+        <strong>${num}　${name}</strong> さんの得点：<strong>${correct} / ${total}</strong>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px;margin-top:12px;">
+        <button class="next-btn" onclick="setMode('study')">📖 自習モードで学習する</button>
+        <button class="next-btn" style="background:#059669;"
+                onclick="sm.started=false; setMode('submit')">📤 送信モードでもう一度</button>
+      </div>`;
+  } else {
+    el.innerHTML = `
+      <div class="sub-result warn">
+        ❌ 送信に失敗しました。ネットワークを確認してもう一度お試しください。<br>
+        <strong>${num}　${name}</strong> さんの得点：<strong>${correct} / ${total}</strong>
+      </div>`;
+    if (btn) { btn.disabled = false; btn.textContent = '📤 もう一度送信する'; }
+  }
+}
+
+// ============================================================
+// 初期化
+// ============================================================
+document.addEventListener('DOMContentLoaded', () => {
+  buildTabs();
+  document.getElementById('modeStudy').classList.add('active');
+  render();
+});
+</script>
+</body>
+</html>
